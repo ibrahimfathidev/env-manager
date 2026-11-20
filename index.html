@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#10131b" />
+  <meta name="description" content="A local-first .env editor, validator, and exporter." />
+  <title>Env Manager — Local-first environment editor</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Env Manager home">
+        <span class="brand-mark">{ }</span>
+        <span>env<span class="brand-light">manager</span></span>
+      </a>
+      <div class="topbar-right">
+        <span class="privacy-pill"><span class="status-dot"></span> Local only</span>
+        <a class="github-link" href="https://github.com/" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="eyebrow"><span class="eyebrow-line"></span> DEVELOPER TOOLKIT / 01</div>
+        <h1>Your environment,<br /><span>under control.</span></h1>
+        <p class="hero-copy">Edit, inspect, validate, and export environment variables in one clean workspace. Your data stays in this browser tab.</p>
+        <div class="hero-meta">
+          <span><span class="meta-icon">⌘</span> No account required</span>
+          <span><span class="meta-icon">◈</span> No backend</span>
+          <span><span class="meta-icon">✓</span> Open source</span>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Environment variable workspace">
+        <div class="workspace-heading">
+          <div>
+            <div class="section-kicker">WORKSPACE</div>
+            <h2>Environment editor</h2>
+          </div>
+          <div class="toolbar">
+            <input id="file-input" type="file" accept=".env,.txt,.json,application/json,text/plain" hidden />
+            <button class="button button-quiet" id="import-button" type="button"><span>↑</span> Import file</button>
+            <button class="button button-quiet" id="sample-button" type="button">Load sample</button>
+            <button class="button button-danger-quiet" id="clear-button" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="stats-grid" aria-live="polite">
+          <article class="stat-card"><span class="stat-label">VARIABLES</span><strong id="stat-total">0</strong><span class="stat-note">Total entries</span></article>
+          <article class="stat-card"><span class="stat-label">VALID</span><strong id="stat-valid" class="good">0</strong><span class="stat-note">Valid names</span></article>
+          <article class="stat-card"><span class="stat-label">ISSUES</span><strong id="stat-issues" class="warn">0</strong><span class="stat-note">Errors & duplicates</span></article>
+          <article class="stat-card"><span class="stat-label">SENSITIVE</span><strong id="stat-sensitive">0</strong><span class="stat-note">Names worth checking</span></article>
+        </div>
+
+        <div class="editor-grid">
+          <section class="panel source-panel">
+            <div class="panel-heading">
+              <div class="panel-title-wrap"><span class="file-icon">≡</span><div><h3>Source</h3><p>Paste or edit your .env content</p></div></div>
+              <span class="file-type">.ENV</span>
+            </div>
+            <label class="sr-only" for="source-editor">Environment file content</label>
+            <textarea id="source-editor" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="# Add your environment variables here&#10;APP_NAME=My App&#10;APP_ENV=development&#10;API_KEY=replace_me"></textarea>
+            <div class="source-footer">
+              <span id="line-count">0 lines</span>
+              <button class="button button-primary" id="parse-button" type="button">Parse variables <span>→</span></button>
+            </div>
+          </section>
+
+          <section class="panel variables-panel">
+            <div class="panel-heading variables-heading">
+              <div class="panel-title-wrap"><span class="table-icon">▦</span><div><h3>Variables</h3><p>Review and edit parsed values</p></div></div>
+              <button class="button button-small button-outline" id="add-button" type="button"><span>＋</span> Add variable</button>
+            </div>
+            <div class="table-tools">
+              <label class="search-box"><span>⌕</span><input id="search-input" type="search" placeholder="Search variables..." /></label>
+              <button class="icon-button" id="toggle-values" type="button" aria-pressed="false" title="Reveal or mask all values">◉ <span id="toggle-label">Reveal</span></button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>KEY</th><th>VALUE</th><th aria-label="Actions"></th></tr></thead>
+                <tbody id="variable-rows"><tr class="empty-row"><td colspan="3"><div class="empty-state"><span class="empty-glyph">{ }</span><strong>No variables yet</strong><span>Import a .env file or paste content into the source editor.</span></div></td></tr></tbody>
+              </table>
+            </div>
+            <div class="variables-footer"><span id="visible-count">Showing 0 variables</span><span class="mask-note">Values are masked by default</span></div>
+          </section>
+        </div>
+
+        <section class="panel diagnostics-panel">
+          <div class="panel-heading diagnostics-heading">
+            <div class="panel-title-wrap"><span class="check-icon">⌁</span><div><h3>Validation report</h3><p>Catch naming mistakes and duplicate keys</p></div></div>
+            <span class="report-status" id="report-status">Waiting for input</span>
+          </div>
+          <div id="diagnostics" class="diagnostics-list" aria-live="polite">
+            <div class="diagnostic-empty"><span>✓</span> Parse a file to see its validation report.</div>
+          </div>
+        </section>
+
+        <section class="export-section">
+          <div class="export-copy"><div class="section-kicker">TAKE IT WITH YOU</div><h2>Export your work.</h2><p>Download the current variables in the format your workflow needs.</p></div>
+          <div class="export-actions">
+            <button class="export-card" id="export-env" type="button"><span class="export-symbol">.env</span><span><strong>Export .env</strong><small>Keep all current values</small></span><b>↓</b></button>
+            <button class="export-card" id="export-example" type="button"><span class="export-symbol example-symbol">.ex</span><span><strong>Export .env.example</strong><small>Keys only, values blank</small></span><b>↓</b></button>
+            <button class="export-card" id="export-json" type="button"><span class="export-symbol json-symbol">{ }</span><span><strong>Export JSON</strong><small>Includes current values</small></span><b>↓</b></button>
+          </div>
+        </section>
+      </section>
+
+      <section class="security-note">
+        <div class="security-icon">⌑</div>
+        <div><strong>Local-first by design.</strong><p>This page processes data in your browser and does not send it to an app server or save it in browser storage. Still, avoid entering production secrets on shared devices, and treat copied or downloaded files as sensitive.</p></div>
+        <span class="security-tag">NO SERVER STORAGE</span>
+      </section>
+    </main>
+
+    <footer class="footer"><span>ENV MANAGER <span class="footer-muted">· A tiny tool for developers</span></span><span>Made for focused workflows <span class="footer-dot">●</span></span></footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
